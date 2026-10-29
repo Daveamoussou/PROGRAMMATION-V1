@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atelier du Code</title>
+<meta name="description" content="Apprends à programmer hors connexion : Python, HTML, CSS, JavaScript, SQL et MCD.">
+<meta name="theme-color" content="#0b8f7e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* Layout: barre haute collante, accueil en grille de catégories, cours = sommaire à gauche + leçon, bac à sable en deux volets */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --surface2:#e9edf2; --line:#d6dce4;
+  --fg:#14202e; --muted:#5a6878;
+  --accent:#0b8f7e; --accent-fg:#ffffff; --accent-soft:#d8f1ec;
+  --warm:#b4690e; --warm-soft:#fbead0;
+  --code-bg:#101a26; --code-fg:#dbe6f2; --code-line:#223245;
+  --ok:#1f8a4c; --err:#c23b3b;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Instrument Sans','Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c131b; --surface:#131d28; --surface2:#1a2735; --line:#26364a;
+  --fg:#e6edf5; --muted:#92a3b6;
+  --accent:#3ec9b2; --accent-fg:#06201b; --accent-soft:#123a35;
+  --warm:#f0b35a; --warm-soft:#3a2c14;
+  --code-bg:#08101a; --code-fg:#dbe6f2; --code-line:#1c2b3d;
+  --ok:#5bd28a; --err:#ff8a8a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c131b; --surface:#131d28; --surface2:#1a2735; --line:#26364a;
+  --fg:#e6edf5; --muted:#92a3b6;
+  --accent:#3ec9b2; --accent-fg:#06201b; --accent-soft:#123a35;
+  --warm:#f0b35a; --warm-soft:#3a2c14;
+  --code-bg:#08101a; --code-fg:#dbe6f2; --code-line:#1c2b3d;
+  --ok:#5bd28a; --err:#ff8a8a; color-scheme:dark}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code{font-family:var(--mono);font-size:.9em;background:var(--surface2);padding:1px 6px;border-radius:5px}
+.wrap{max-width:1120px;margin:0 auto}
+
+/* Barre haute */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.top .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font:800 19px var(--display);background:none;border:0;padding:0}
+.brand i{font:500 13px var(--mono);font-style:normal;background:var(--fg);color:var(--bg);padding:3px 7px;border-radius:6px}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav button{background:none;border:0;padding:7px 12px;border-radius:8px;font-weight:600;color:var(--muted)}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.nav button:hover{color:var(--fg)}
+.sp{flex:1}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--surface2);color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.pill b{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+.pill.off b{background:var(--warm)}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:13px}
+
+/* Accueil */
+.hero{padding:34px 0 10px;display:grid;gap:18px}
+.hero h1{font-size:clamp(30px,5vw,48px);font-weight:800;letter-spacing:-.02em;max-width:18ch}
+.hero p{color:var(--muted);max-width:56ch;margin:0;font-size:16px}
+.resume{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--code-bg);color:var(--code-fg);border-radius:14px;padding:18px 20px;border:1px solid var(--code-line)}
+.resume .t{flex:1;min-width:200px}
+.resume small{font:500 12px var(--mono);color:#7fd8c9;letter-spacing:.04em;text-transform:uppercase}
+.resume strong{display:block;font:700 19px var(--display);margin-top:3px}
+.btn{background:var(--accent);color:var(--accent-fg);border:0;border-radius:9px;padding:9px 16px;font-weight:600}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--surface2)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.sec-title{display:flex;align-items:baseline;gap:12px;margin:34px 0 14px}
+.sec-title h2{font-size:22px}
+.sec-title span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:left;display:grid;gap:10px;position:relative;overflow:hidden}
+.cat:hover{border-color:var(--c);transform:translateY(-2px)}
+.cat{transition:transform .15s,border-color .15s}
+.cat .sym{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font:500 15px var(--mono);background:color-mix(in srgb,var(--c) 16%,var(--surface));color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.cat h3{font-size:18px}
+.cat p{margin:0;color:var(--muted);font-size:13.5px}
+.bar{height:6px;border-radius:9px;background:var(--surface2);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--c,var(--accent));border-radius:9px}
+.cat .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.soon{display:flex;gap:8px;flex-wrap:wrap}
+.soon span{border:1px dashed var(--line);border-radius:99px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.lab-card{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--warm-soft);border:1px solid color-mix(in srgb,var(--warm) 40%,transparent);border-radius:14px;padding:18px 20px;margin-top:14px}
+.lab-card .t{flex:1;min-width:220px}
+.lab-card h3{font-size:18px;color:var(--warm)}
+.lab-card p{margin:4px 0 0;color:var(--fg)}
+
+/* Cours */
+.course{display:grid;grid-template-columns:260px minmax(0,1fr);gap:26px;padding-top:24px;align-items:start}
+.toc{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:4px;max-height:calc(100vh - 90px);overflow:auto}
+.toc h3{font-size:16px;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.toc .lvl{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 4px 2px}
+.toc button{display:flex;gap:9px;text-align:left;background:none;border:0;padding:7px 8px;border-radius:8px;font-size:14px;align-items:flex-start}
+.toc button:hover{background:var(--surface2)}
+.toc button[aria-current="true"]{background:color-mix(in srgb,var(--c) 15%,var(--surface));font-weight:600}
+.toc .ck{flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:11px;margin-top:2px;color:transparent}
+.toc .done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.lesson{display:grid;gap:18px;min-width:0}
+.crumb{font:500 12px var(--mono);color:var(--muted);letter-spacing:.03em}
+.lesson h1{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.015em}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:12px;min-width:0}
+.block>h2{font-size:15px;font-family:var(--mono);font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--c)}
+.block p{margin:0;max-width:68ch}
+.block ul{margin:0;padding-left:20px;max-width:68ch}
+.block li{margin:3px 0}
+.tip{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:14px;max-width:68ch}
+.codebox{background:var(--code-bg);border:1px solid var(--code-line);border-radius:11px;overflow:hidden}
+.codebox .cap{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid var(--code-line);font:500 12px var(--mono);color:#8fa5bb}
+pre.code{margin:0;padding:14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--code-fg);tab-size:2}
+textarea.ed{display:block;width:100%;min-height:170px;resize:vertical;background:var(--code-bg);color:var(--code-fg);border:0;padding:14px;font:400 13.5px/1.65 var(--mono);tab-size:2;white-space:pre;overflow:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.out{background:var(--surface);border:1px solid var(--line);border-radius:11px;min-height:70px;overflow:hidden}
+.out .cap{padding:6px 12px;border-bottom:1px solid var(--line);font:500 12px var(--mono);color:var(--muted);display:flex;gap:8px;align-items:center}
+.out pre{margin:0;padding:12px 14px;font:400 13.5px/1.6 var(--mono);white-space:pre-wrap;word-break:break-word}
+.out pre.err{color:var(--err)}
+.out .idle{padding:14px;color:var(--muted);font-size:14px}
+.out iframe{display:block;width:100%;height:260px;border:0;background:#fff}
+.out svg{display:block;max-width:100%;height:auto}
+.out .tbl{overflow-x:auto;padding:8px 12px}
+.out table{border-collapse:collapse;font:13px var(--mono);margin:6px 0}
+.out th,.out td{border:1px solid var(--line);padding:4px 10px;text-align:left}
+.out th{background:var(--surface2)}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:4px}
+.done-badge{color:var(--ok);font-weight:600;font-size:14px}
+.reveal{background:var(--warm-soft);border-radius:10px;padding:10px 14px;font-size:14px}
+.reveal pre{margin:6px 0 0;font:13px/1.55 var(--mono);white-space:pre-wrap}
+
+/* Bac à sable */
+.lab{padding-top:24px;display:grid;gap:14px}
+.lab h1{font-size:clamp(26px,4vw,36px);font-weight:800}
+.lab-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select{font:inherit;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.lab-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--code-line)}
+.tabs button{background:none;border:0;color:#8fa5bb;padding:6px 12px;font:500 12px var(--mono);border-radius:7px 7px 0 0}
+.tabs button[aria-selected="true"]{background:var(--code-bg);color:#fff;box-shadow:inset 0 -2px 0 var(--accent)}
+.full{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;grid-template-rows:auto 1fr;padding-top:env(safe-area-inset-top,0px)}
+.full .hd{display:flex;justify-content:space-between;align-items:center;padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.full iframe{width:100%;height:100%;border:0;background:#fff}
+
+.note{font-size:13px;color:var(--muted)}
+@media (max-width:860px){
+  .course{grid-template-columns:minmax(0,1fr)}
+  .toc{position:static;max-height:none;grid-auto-flow:row}
+  .lab-grid{grid-template-columns:minmax(0,1fr)}
+  .nav{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){.cat{transition:none}.cat:hover{transform:none}}
+</style>
+
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <button class="brand" data-nav="home" aria-label="Accueil"><i>&lt;/&gt;</i>Atelier du Code</button>
+  <button class="icon-btn" id="back" hidden aria-label="Retour à l'accueil">&larr; Accueil</button>
+  <nav class="nav" aria-label="Navigation">
+    <button data-nav="home" id="n-home">Accueil</button>
+    <button data-nav="lab" id="n-lab">Bac à sable</button>
+  </nav>
+  <span class="sp"></span>
+  <span class="pill" id="net"><b></b><span>En ligne</span></span>
+  <button class="icon-btn" id="theme" aria-label="Changer de thème">Thème</button>
+</div></div>
+
+<main class="wrap" id="app"></main>
+<div id="fs" hidden></div>
+
+<script>
+/* ============ Données ============ */
+var LANGS = {
+  python:{name:'Python',sym:'py',color:'#3b82c4',desc:'Le langage idéal pour débuter : lisible, polyvalent, partout.',run:'python'},
+  html:{name:'HTML',sym:'<>',color:'#d9561f',desc:'La structure de toutes les pages web.',run:'html'},
+  css:{name:'CSS',sym:'{}',color:'#7a5bd6',desc:'Couleurs, mises en page et animations.',run:'css'},
+  js:{name:'JavaScript',sym:'js',color:'#c79a0a',desc:'Rendre les pages vivantes et interactives.',run:'js'},
+  sql:{name:'SQL',sym:'db',color:'#0b8f7e',desc:'Interroger et organiser les bases de données.',run:'sql'},
+  mcd:{name:'MCD / Merise',sym:'mcd',color:'#c2407a',desc:'Concevoir une base de données, du niveau 0 à l’expert.',run:'mcd'}
+};
+var SOON = ['Git','Bash / Terminal','TypeScript','PHP','Java','C','React','Algorithmique','Regex','API & JSON'];
+
+var L = [];
+function add(lang, level, title, course, example, ex){ L.push({id:lang+'-'+(L.filter(function(x){return x.lang===lang}).length+1),lang:lang,level:level,title:title,course:course,example:example,ex:ex}); }
+
+/* ---- Python ---- */
+add('python','Débutant','Afficher du texte avec print()',
+ '<p>Un programme est une suite d’instructions que l’ordinateur exécute de haut en bas. La plus simple affiche du texte à l’écran : <code>print()</code>.</p><p>Le texte se place entre guillemets. On peut écrire plusieurs <code>print</code> : chacun affiche sur une nouvelle ligne.</p><div class="tip">Les lignes qui commencent par <code>#</code> sont des commentaires : Python les ignore.</div>',
+ '# Mon premier programme\nprint("Bonjour le monde")\nprint("J\'apprends Python")',
+ {prompt:'Affiche ton prénom puis une phrase qui commence par « J\'aime ».',starter:'print("Mon prénom est ...")\n',hint:'Chaque print() affiche une ligne. N\'oublie pas les guillemets.',solution:'print("Mon prénom est David")\nprint("J\'aime programmer")'});
+add('python','Débutant','Variables et types',
+ '<p>Une variable est une boîte qui porte un nom et contient une valeur. On la crée avec le signe <code>=</code>.</p><ul><li><code>str</code> : du texte, <code>"salut"</code></li><li><code>int</code> : un entier, <code>42</code></li><li><code>float</code> : un nombre à virgule, <code>3.14</code></li><li><code>bool</code> : <code>True</code> ou <code>False</code></li></ul><p>La fonction <code>type()</code> indique le type d’une valeur. Un f-string (<code>f"..."</code>) insère des variables dans un texte.</p>',
+ 'age = 25\nprenom = "Awa"\nprint(f"{prenom} a {age} ans")\nprint(type(age))',
+ {prompt:'Crée deux variables, <code>prix</code> et <code>quantite</code>, puis affiche le total avec une phrase.',starter:'prix = 1500\nquantite = 3\n# affiche le total\n',hint:'total = prix * quantite, puis print(f"Total : {total}")',solution:'prix = 1500\nquantite = 3\ntotal = prix * quantite\nprint(f"Total : {total} FCFA")'});
+add('python','Débutant','Conditions : if / elif / else',
+ '<p>Une condition permet au programme de choisir. Si le test est vrai, le bloc indenté s’exécute.</p><p>Opérateurs de comparaison : <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>. L’<strong>indentation</strong> (4 espaces) compte : elle définit le bloc.</p>',
+ 'note = 14\nif note >= 16:\n    print("Très bien")\nelif note >= 10:\n    print("Admis")\nelse:\n    print("À revoir")',
+ {prompt:'Change la valeur de <code>temperature</code> et affiche « Il fait chaud » au-dessus de 30, sinon « Température agréable ».',starter:'temperature = 33\n',hint:'if temperature > 30: ... else: ...',solution:'temperature = 33\nif temperature > 30:\n    print("Il fait chaud")\nelse:\n    print("Température agréable")'});
+add('python','Débutant','Boucles for et while',
+ '<p>Une boucle répète des instructions. <code>for</code> parcourt une suite connue, <code>while</code> répète tant qu’une condition est vraie.</p><p><code>range(5)</code> produit 0, 1, 2, 3, 4. Attention à une boucle <code>while</code> dont la condition ne devient jamais fausse : elle ne s’arrête pas.</p>',
+ 'for i in range(1, 6):\n    print("Tour", i)\n\ncompteur = 3\nwhile compteur > 0:\n    print(compteur)\n    compteur -= 1',
+ {prompt:'Affiche la table de multiplication de 7 de 1 à 10.',starter:'for i in range(1, 11):\n    # affiche 7 x i = ...\n    pass\n',hint:'print(f"7 x {i} = {7*i}")',solution:'for i in range(1, 11):\n    print(f"7 x {i} = {7*i}")'});
+add('python','Intermédiaire','Listes et dictionnaires',
+ '<p>Une <strong>liste</strong> range plusieurs valeurs dans l’ordre : <code>[10, 20, 30]</code>. On accède à un élément par son indice (le premier est 0).</p><p>Un <strong>dictionnaire</strong> associe des clés à des valeurs : <code>{"nom": "Awa", "age": 25}</code>.</p>',
+ 'fruits = ["mangue", "ananas"]\nfruits.append("papaye")\nprint(fruits[0], len(fruits))\n\neleve = {"nom": "Awa", "age": 25}\nprint(eleve["nom"])',
+ {prompt:'Crée une liste de 4 nombres et affiche leur somme avec <code>sum()</code>.',starter:'nombres = []\n',hint:'nombres = [4, 8, 15, 16] puis print(sum(nombres))',solution:'nombres = [4, 8, 15, 16]\nprint(sum(nombres))'});
+add('python','Intermédiaire','Fonctions',
+ '<p>Une fonction regroupe des instructions réutilisables. On la définit avec <code>def</code>, on lui passe des paramètres, elle renvoie un résultat avec <code>return</code>.</p>',
+ 'def carre(n):\n    return n * n\n\nprint(carre(6))\nprint(carre(12))',
+ {prompt:'Écris une fonction <code>est_pair(n)</code> qui renvoie True si n est pair, puis teste-la.',starter:'def est_pair(n):\n    pass\n\nprint(est_pair(4))\nprint(est_pair(7))\n',hint:'n % 2 == 0',solution:'def est_pair(n):\n    return n % 2 == 0\n\nprint(est_pair(4))\nprint(est_pair(7))'});
+
+/* ---- HTML ---- */
+add('html','Débutant','Ta première page',
+ '<p>Une page HTML est faite de <strong>balises</strong> qui décrivent le contenu. La plupart s’ouvrent et se ferment : <code>&lt;p&gt;texte&lt;/p&gt;</code>.</p><ul><li><code>&lt;h1&gt;</code> à <code>&lt;h6&gt;</code> : titres</li><li><code>&lt;p&gt;</code> : paragraphe</li><li><code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code> : importance, emphase</li></ul>',
+ '<h1>Bienvenue</h1>\n<p>Ceci est mon <strong>premier</strong> paragraphe.</p>',
+ {prompt:'Écris un titre avec ton nom, puis un paragraphe qui te présente en mettant un mot en gras.',starter:'<h1></h1>\n<p></p>\n',hint:'Pense à fermer chaque balise.',solution:'<h1>David</h1>\n<p>Je suis <strong>passionné</strong> de code.</p>'});
+add('html','Débutant','Liens, images et listes',
+ '<p>Le lien : <code>&lt;a href="adresse"&gt;texte&lt;/a&gt;</code>. L’image : <code>&lt;img src="..." alt="description"&gt;</code>. Les listes : <code>&lt;ul&gt;</code> (à puces) ou <code>&lt;ol&gt;</code> (numérotée), avec des <code>&lt;li&gt;</code>.</p>',
+ '<ul>\n  <li>HTML</li>\n  <li>CSS</li>\n  <li>JavaScript</li>\n</ul>\n<a href="https://example.com">Un lien</a>',
+ {prompt:'Crée une liste numérotée de tes 3 plats préférés, suivie d’un lien.',starter:'<ol>\n</ol>\n',hint:'Chaque plat est un <li> dans le <ol>.',solution:'<ol>\n  <li>Riz sauce</li>\n  <li>Igname pilée</li>\n  <li>Poisson braisé</li>\n</ol>\n<a href="https://example.com">Mes recettes</a>'});
+add('html','Intermédiaire','Formulaires',
+ '<p>Un formulaire collecte des informations : <code>&lt;form&gt;</code>, <code>&lt;label&gt;</code>, <code>&lt;input type="..."&gt;</code>, <code>&lt;button&gt;</code>. Types courants : <code>text</code>, <code>email</code>, <code>number</code>, <code>password</code>.</p>',
+ '<form>\n  <label>Nom <input type="text"></label><br>\n  <label>Email <input type="email"></label><br>\n  <button type="button">Envoyer</button>\n</form>',
+ {prompt:'Crée un formulaire avec un champ nom, un champ âge (nombre) et un bouton.',starter:'<form>\n</form>\n',hint:'<input type="number">',solution:'<form>\n  <label>Nom <input type="text"></label><br>\n  <label>Âge <input type="number"></label><br>\n  <button type="button">Valider</button>\n</form>'});
+
+/* ---- CSS ---- */
+var CSSBASE='<h1 class="titre">Mon titre</h1><p class="texte">Un paragraphe de démonstration.</p><button class="bouton">Cliquer</button>';
+add('css','Débutant','Sélecteurs, couleurs et texte',
+ '<p>Le CSS décrit l’apparence : <code>sélecteur { propriété: valeur; }</code>. Propriétés de départ : <code>color</code>, <code>background</code>, <code>font-size</code>, <code>font-family</code>, <code>text-align</code>.</p><p>Un sélecteur peut viser une balise (<code>p</code>) ou une classe (<code>.titre</code>).</p>',
+ '.titre {\n  color: crimson;\n  text-align: center;\n}\n.texte {\n  font-size: 20px;\n  background: #eef;\n}',
+ {prompt:'Mets le titre en bleu, centré, et le paragraphe en italique avec un fond jaune clair.',starter:'.titre {\n}\n.texte {\n}\n',hint:'font-style: italic; background: lightyellow;',solution:'.titre {\n  color: royalblue;\n  text-align: center;\n}\n.texte {\n  font-style: italic;\n  background: lightyellow;\n}',base:CSSBASE});
+add('css','Débutant','Le modèle de boîte',
+ '<p>Chaque élément est une boîte : <code>content</code>, <code>padding</code> (marge intérieure), <code>border</code> (bordure), <code>margin</code> (marge extérieure). <code>border-radius</code> arrondit les coins.</p>',
+ '.bouton {\n  padding: 12px 24px;\n  border: 2px solid teal;\n  border-radius: 10px;\n  margin-top: 16px;\n}',
+ {prompt:'Transforme le bouton : fond vert, texte blanc, padding large, coins très arrondis, sans bordure.',starter:'.bouton {\n}\n',hint:'border: none; border-radius: 999px;',solution:'.bouton {\n  background: seagreen;\n  color: white;\n  padding: 14px 28px;\n  border: none;\n  border-radius: 999px;\n}',base:CSSBASE});
+add('css','Intermédiaire','Flexbox',
+ '<p>Flexbox aligne des éléments en ligne ou en colonne. Sur le parent : <code>display: flex</code>, puis <code>justify-content</code> (axe principal), <code>align-items</code> (axe secondaire), <code>gap</code> (espace entre éléments).</p>',
+ '.boite {\n  display: flex;\n  justify-content: space-between;\n  gap: 12px;\n}\n.carte { background:#cde; padding:16px; }',
+ {prompt:'Place les trois cartes côte à côte, centrées, avec un espace de 16px.',starter:'.boite {\n}\n.carte { background:#cde; padding:16px; border-radius:8px; }\n',hint:'display:flex; justify-content:center; gap:16px;',solution:'.boite {\n  display: flex;\n  justify-content: center;\n  gap: 16px;\n}\n.carte { background:#cde; padding:16px; border-radius:8px; }',base:'<div class="boite"><div class="carte">Un</div><div class="carte">Deux</div><div class="carte">Trois</div></div>'});
+
+/* ---- JavaScript ---- */
+add('js','Débutant','Variables et console.log',
+ '<p>JavaScript s’exécute dans le navigateur. On déclare une variable avec <code>let</code> (modifiable) ou <code>const</code> (constante). <code>console.log()</code> affiche une valeur.</p>',
+ 'const prenom = "Awa";\nlet points = 10;\npoints = points + 5;\nconsole.log(prenom, points);',
+ {prompt:'Déclare deux nombres, calcule leur produit et affiche-le.',starter:'const a = 6;\nconst b = 7;\n',hint:'console.log(a * b)',solution:'const a = 6;\nconst b = 7;\nconsole.log(a * b);'});
+add('js','Débutant','Fonctions et conditions',
+ '<p>Une fonction se déclare avec <code>function</code> ou la syntaxe fléchée <code>(x) =&gt; ...</code>. Les conditions utilisent <code>if / else</code> avec <code>===</code> pour comparer.</p>',
+ 'function salue(nom) {\n  if (nom === "") return "Bonjour inconnu";\n  return "Bonjour " + nom;\n}\nconsole.log(salue("Awa"));\nconsole.log(salue(""));',
+ {prompt:'Écris une fonction <code>majeur(age)</code> qui renvoie « majeur » à partir de 18 ans, sinon « mineur ».',starter:'function majeur(age) {\n}\nconsole.log(majeur(20));\nconsole.log(majeur(12));\n',hint:'return age >= 18 ? "majeur" : "mineur"',solution:'function majeur(age) {\n  return age >= 18 ? "majeur" : "mineur";\n}\nconsole.log(majeur(20));\nconsole.log(majeur(12));'});
+add('js','Intermédiaire','Tableaux et boucles',
+ '<p>Un tableau contient plusieurs valeurs. Méthodes utiles : <code>push</code>, <code>map</code>, <code>filter</code>, <code>forEach</code>.</p>',
+ 'const notes = [8, 12, 15, 9];\nconst admis = notes.filter(n => n >= 10);\nconsole.log(admis);\nconsole.log(notes.map(n => n * 2));',
+ {prompt:'À partir du tableau, affiche uniquement les nombres pairs.',starter:'const nombres = [1,2,3,4,5,6];\n',hint:'nombres.filter(n => n % 2 === 0)',solution:'const nombres = [1,2,3,4,5,6];\nconsole.log(nombres.filter(n => n % 2 === 0));'});
+
+/* ---- SQL ---- */
+var SQLSETUP="CREATE TABLE eleves(id INTEGER PRIMARY KEY, nom TEXT, ville TEXT, note REAL);INSERT INTO eleves VALUES(1,'Awa','Cotonou',15.5),(2,'Koffi','Porto-Novo',11),(3,'Mariam','Cotonou',17),(4,'Yves','Parakou',8.5),(5,'Sika','Porto-Novo',13);";
+add('sql','Débutant','SELECT : lire des données',
+ '<p>SQL interroge une base. <code>SELECT colonnes FROM table</code> lit les données. <code>*</code> signifie « toutes les colonnes ». La table <code>eleves</code> est déjà créée pour toi (id, nom, ville, note).</p>',
+ 'SELECT nom, note FROM eleves;',
+ {prompt:'Affiche le nom et la ville de tous les élèves.',starter:'SELECT FROM eleves;',hint:'SELECT nom, ville FROM eleves;',solution:'SELECT nom, ville FROM eleves;',setup:SQLSETUP});
+add('sql','Débutant','WHERE et ORDER BY',
+ '<p><code>WHERE</code> filtre les lignes, <code>ORDER BY</code> les trie (<code>DESC</code> pour décroissant), <code>LIMIT</code> limite le nombre de résultats.</p>',
+ "SELECT * FROM eleves\nWHERE ville = 'Cotonou'\nORDER BY note DESC;",
+ {prompt:'Affiche les élèves dont la note est supérieure ou égale à 12, du meilleur au moins bon.',starter:'SELECT * FROM eleves\n',hint:'WHERE note >= 12 ORDER BY note DESC',solution:'SELECT * FROM eleves\nWHERE note >= 12\nORDER BY note DESC;',setup:SQLSETUP});
+add('sql','Intermédiaire','Agrégats et GROUP BY',
+ '<p>Fonctions d’agrégat : <code>COUNT</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>, <code>SUM</code>. Avec <code>GROUP BY</code>, on calcule par groupe.</p>',
+ 'SELECT ville, COUNT(*) AS effectif, AVG(note) AS moyenne\nFROM eleves\nGROUP BY ville;',
+ {prompt:'Calcule la note maximale par ville.',starter:'SELECT ville, FROM eleves GROUP BY ville;',hint:'MAX(note)',solution:'SELECT ville, MAX(note) AS meilleure\nFROM eleves\nGROUP BY ville;',setup:SQLSETUP});
+
+/* ---- MCD ---- */
+add('mcd','Niveau 0','C’est quoi un MCD ?',
+ '<p>Avant de créer une base de données, on la <strong>dessine</strong>. Le MCD (Modèle Conceptuel de Données), de la méthode Merise, décrit les informations d’un domaine et leurs liens, sans parler de technique.</p><ul><li>Une <strong>entité</strong> : un objet du domaine (Client, Produit).</li><li>Une <strong>association</strong> : un lien entre entités (« passer commande »).</li><li>Des <strong>cardinalités</strong> : combien de fois un lien peut exister.</li></ul><p>Étapes de Merise : MCD, puis MLD (logique), puis MPD (physique, le vrai SQL).</p>',
+ 'Client: *id_client, nom, telephone\nProduit: *id_produit, libelle, prix\nClient (0,N) acheter (0,N) Produit',
+ {prompt:'Dessine un MCD très simple : une entité <code>Livre</code> et une entité <code>Auteur</code>, reliées par « écrire ». Syntaxe : <code>Entité: *identifiant, propriété</code> puis <code>A (0,N) verbe (1,1) B</code>.',starter:'Livre: *isbn, titre\nAuteur: *id_auteur, nom\n',hint:'Auteur (1,N) écrire (0,N) Livre',solution:'Livre: *isbn, titre\nAuteur: *id_auteur, nom\nAuteur (1,N) écrire (0,N) Livre'});
+add('mcd','Niveau 1','Entités et propriétés',
+ '<p>Une entité regroupe des <strong>propriétés</strong> (ses attributs). Chaque entité possède un <strong>identifiant</strong> : une propriété unique pour chaque occurrence, soulignée dans le schéma (ici marquée par <code>*</code>).</p><div class="tip">Bonnes pratiques : un nom d’entité au singulier et en majuscule initiale, pas de propriété calculée (l’âge se déduit de la date de naissance), pas de propriété répétée.</div>',
+ 'Eleve: *num_eleve, nom, prenom, date_naissance\nClasse: *code_classe, libelle',
+ {prompt:'Définis une entité <code>Employe</code> avec un identifiant et 4 propriétés pertinentes. Ajoute une entité <code>Service</code>.',starter:'Employe: *matricule, \nService: *code_service, \n',hint:'Évite « age » : préfère date_naissance.',solution:'Employe: *matricule, nom, prenom, date_embauche, salaire\nService: *code_service, nom_service'});
+add('mcd','Niveau 2','Associations et cardinalités',
+ '<p>Une association relie des entités. Les <strong>cardinalités</strong> (min,max) se lisent côté entité : « une occurrence de l’entité participe au minimum / au maximum à ... associations ».</p><ul><li><code>0,1</code> : au plus une, facultatif</li><li><code>1,1</code> : exactement une</li><li><code>0,N</code> : zéro ou plusieurs</li><li><code>1,N</code> : au moins une</li></ul><p>Exemple : un client peut passer 0 à N commandes ; une commande est passée par exactement 1 client.</p>',
+ 'Client: *id_client, nom\nCommande: *num_commande, date_commande\nClient (0,N) passer (1,1) Commande',
+ {prompt:'Un <code>Medecin</code> soigne plusieurs <code>Patient</code> ; chaque patient a un seul médecin référent. Écris l’association avec les bonnes cardinalités.',starter:'Medecin: *id_medecin, nom\nPatient: *id_patient, nom\n',hint:'Médecin : (0,N). Patient : (1,1).',solution:'Medecin: *id_medecin, nom\nPatient: *id_patient, nom\nMedecin (0,N) suivre (1,1) Patient'});
+add('mcd','Niveau 3','Association porteuse de propriétés',
+ '<p>Quand deux entités sont liées en (0,N)-(0,N), l’association peut porter ses propres propriétés. Exemple : une commande contient plusieurs produits, avec une <strong>quantité</strong> pour chaque couple. La quantité n’appartient ni à la commande ni au produit : elle appartient à l’association « contenir ».</p><p>Dans cet outil, ajoute les propriétés de l’association après deux-points.</p>',
+ 'Commande: *num_commande, date_commande\nProduit: *id_produit, libelle, prix\nCommande (1,N) contenir: quantite (0,N) Produit',
+ {prompt:'Un <code>Etudiant</code> passe des <code>Examen</code>s et obtient une note pour chacun. Place la propriété <code>note</code> au bon endroit.',starter:'Etudiant: *num_etudiant, nom\nExamen: *code_examen, matiere\n',hint:'Etudiant (0,N) passer: note (0,N) Examen',solution:'Etudiant: *num_etudiant, nom\nExamen: *code_examen, matiere\nEtudiant (0,N) passer: note (0,N) Examen'});
+add('mcd','Niveau 4','Association réflexive',
+ '<p>Une association réflexive relie une entité à elle-même. Exemple : un employé a un supérieur hiérarchique qui est lui-même un employé. On nomme les deux rôles dans l’association.</p>',
+ 'Employe: *matricule, nom\nEmploye (0,N) diriger (0,1) Employe',
+ {prompt:'Modélise « une Personne peut être le parent de plusieurs Personnes ; chaque personne a au plus 2 parents ».',starter:'Personne: *id_personne, nom\n',hint:'Personne (0,N) parent_de (0,2) Personne',solution:'Personne: *id_personne, nom\nPersonne (0,N) parent_de (0,2) Personne'});
+add('mcd','Niveau 5','Héritage et du MCD au SQL',
+ '<p><strong>Héritage</strong> : une entité générale (Personne) et des spécialisations (Etudiant, Enseignant) qui héritent de ses propriétés. Trois façons de le traduire en tables : une table par entité fille, une seule table avec un type, ou une table mère reliée aux filles.</p><p><strong>Règles MCD vers MLD</strong> :</p><ul><li>Entité devient table, identifiant devient clé primaire.</li><li>Association (x,1)-(x,N) : la clé de l’entité côté N reçoit une clé étrangère.</li><li>Association (x,N)-(x,N) : nouvelle table avec la clé composée des deux identifiants.</li></ul><p>Ensuite viennent la <strong>normalisation</strong> (1FN, 2FN, 3FN) pour éviter la redondance. Rends-toi dans le cours SQL pour créer les tables.</p>',
+ 'Client: *id_client, nom\nCommande: *num_commande, date_commande\nClient (0,N) passer (1,1) Commande\n\n-- MLD obtenu :\n-- Client(id_client, nom)\n-- Commande(num_commande, date_commande, #id_client)',
+ {prompt:'Écris le MCD d’une bibliothèque : <code>Adherent</code>, <code>Livre</code>, et l’emprunt avec une date.',starter:'',hint:'Adherent (0,N) emprunter: date_emprunt (0,N) Livre',solution:'Adherent: *num_adherent, nom\nLivre: *isbn, titre\nAdherent (0,N) emprunter: date_emprunt (0,N) Livre'});
+
+/* ============ État & stockage ============ */
+var S = {view:'home',lang:null,idx:0,state:{done:{},last:null,draft:{},lab:{},theme:null}};
+function load(){try{var r=localStorage.getItem('atelier-v1');if(r){var o=JSON.parse(r);for(var k in o)S.state[k]=o[k]}}catch(e){}}
+function save(){try{localStorage.setItem('atelier-v1',JSON.stringify(S.state))}catch(e){}}
+function $(s,r){return (r||document).querySelector(s)}
+function esc(t){return String(t).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+function lessonsOf(lang){return L.filter(function(x){return x.lang===lang})}
+function doneCount(lang){return lessonsOf(lang).filter(function(l){return S.state.done[l.id]}).length}
+
+/* ============ Exécuteurs ============ */
+var runId=0;
+function loadScript(src){return new Promise(function(ok,ko){var s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=function(){ko(new Error('Chargement impossible : '+src))};document.head.appendChild(s)})}
+var pyodidePromise=null;
+function getPy(){if(!pyodidePromise){pyodidePromise=loadScript('https://cdn.jsdelivr.net/npm/pyodide@0.26.4/full/pyodide.js').then(function(){return loadPyodide({indexURL:'https://cdn.jsdelivr.net/npm/pyodide@0.26.4/full/'})}).catch(function(e){pyodidePromise=null;throw e})}return pyodidePromise}
+var sqlPromise=null;
+function getSql(){if(!sqlPromise){var base='https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/';sqlPromise=loadScript(base+'sql-wasm.js').then(function(){return initSqlJs({locateFile:function(f){return base+f}})}).catch(function(e){sqlPromise=null;throw e})}return sqlPromise}
+
+function frameDoc(inner){return inner}
+function setOut(el,html,cap){el.innerHTML='<div class="cap">'+(cap||'Résultat')+'</div>'+html}
+
+async function runCode(lang,code,ex,el){
+  var id=++runId;
+  try{
+    if(lang==='python'){
+      setOut(el,'<div class="idle">Chargement de Python…</div>','Résultat · Python');
+      var py=await getPy(),buf=[];
+      py.setStdout({batched:function(s){buf.push(s)}});py.setStderr({batched:function(s){buf.push(s)}});
+      try{await py.runPythonAsync(code);setOut(el,'<pre>'+esc(buf.join('\n')||'(aucune sortie : utilise print() pour afficher)')+'</pre>','Résultat · Python')}
+      catch(e){var m=String(e.message||e).split('\n').filter(Boolean);setOut(el,'<pre class="err">'+esc(buf.concat(m.slice(-3)).join('\n'))+'</pre>','Erreur · Python')}
+    }else if(lang==='html'||lang==='css'||lang==='web'){
+      var doc;
+      if(lang==='html')doc=code;
+      else if(lang==='css')doc='<style>'+code+'</style>'+(ex.base||'');
+      else doc=code;
+      var f=document.createElement('iframe');f.setAttribute('sandbox','allow-scripts');f.title='Aperçu';f.srcdoc=doc;
+      el.innerHTML='<div class="cap">Aperçu</div>';el.appendChild(f);
+    }else if(lang==='js'){
+      var logs=[];
+      var f2=document.createElement('iframe');f2.style.display='none';f2.setAttribute('sandbox','allow-scripts');
+      var fmt='function __f(a){try{return typeof a==="string"?a:JSON.stringify(a)}catch(e){return String(a)}}';
+      var pre='<scr'+'ipt>'+fmt+'var __l=[];console.log=function(){__l.push([].map.call(arguments,__f).join(" "))};console.error=console.log;try{';
+      var post='\n}catch(e){__l.push("Erreur : "+e.message)}parent.postMessage({__run:'+id+',logs:__l},"*");</scr'+'ipt>';
+      var got=false;
+      var h=function(ev){if(ev.data&&ev.data.__run===id){got=true;window.removeEventListener('message',h);f2.remove();var bad=ev.data.logs.some(function(l){return l.indexOf('Erreur : ')===0});setOut(el,'<pre'+(bad?' class="err"':'')+'>'+esc(ev.data.logs.join('\n')||'(aucune sortie : utilise console.log())')+'</pre>','Console · JavaScript')}};
+      window.addEventListener('message',h);
+      f2.srcdoc='<body>'+pre+code+post+'</body>';document.body.appendChild(f2);
+      setTimeout(function(){if(!got){window.removeEventListener('message',h);f2.remove();setOut(el,'<pre class="err">Le code ne répond pas (boucle infinie ou erreur de syntaxe).</pre>','Console · JavaScript')}},4000);
+    }else if(lang==='sql'){
+      setOut(el,'<div class="idle">Chargement du moteur SQL…</div>','Résultat · SQL');
+      var SQL=await getSql();var db=new SQL.Database();
+      if(ex&&ex.setup)db.exec(ex.setup);
+      try{var res=db.exec(code);
+        if(!res.length)setOut(el,'<pre>Requête exécutée. Aucune ligne à afficher.</pre>','Résultat · SQL');
+        else setOut(el,res.map(function(r){return '<div class="tbl"><table><tr>'+r.columns.map(function(c){return '<th>'+esc(c)+'</th>'}).join('')+'</tr>'+r.values.map(function(v){return '<tr>'+v.map(function(c){return '<td>'+esc(c===null?'NULL':c)+'</td>'}).join('')+'</tr>'}).join('')+'</table></div>'}).join(''),'Résultat · SQL');
+      }catch(e){setOut(el,'<pre class="err">'+esc(e.message)+'</pre>','Erreur · SQL')}
+      db.close();
+    }else if(lang==='mcd'){
+      var r=renderMCD(code);
+      setOut(el,r.error?'<pre class="err">'+esc(r.error)+'</pre>':r.svg,'Schéma MCD');
+    }
+  }catch(e){setOut(el,'<pre class="err">'+esc(e.message)+'\nLe moteur de ce langage n’est pas encore disponible. Ouvre l’application une fois avec internet et patiente une minute : il sera ensuite enregistré pour le hors connexion.</pre>','Erreur')}
+}
+
+/* ============ Rendu MCD ============ */
+function renderMCD(src){
+  var ents={},order=[],assocs=[];
+  var lines=src.split('\n').map(function(s){return s.trim()}).filter(function(s){return s&&s.indexOf('--')!==0});
+  var ra=/^(.+?)\s*\((\d|N),(\d|N)\)\s*([^:()]+?)\s*(?::\s*([^()]*?))?\s*\((\d|N),(\d|N)\)\s*(.+)$/i;
+  function ensure(n){if(!ents[n]){ents[n]={props:[]};order.push(n)}}
+  for(var i=0;i<lines.length;i++){
+    var ln=lines[i],m;
+    if((m=ra.exec(ln))){var a=m[1].trim(),b=m[8].trim();ensure(a);ensure(b);assocs.push({a:a,ca:m[2]+','+m[3],name:m[4].trim(),props:m[5]?m[5].split(',').map(function(s){return s.trim()}).filter(Boolean):[],cb:m[6]+','+m[7],b:b})}
+    else if(ln.indexOf(':')>0){var p=ln.split(':'),n=p[0].trim();ensure(n);ents[n].props=p.slice(1).join(':').split(',').map(function(s){return s.trim()}).filter(Boolean)}
+    else return {error:'Ligne non comprise : « '+ln+' »\nEntité : Nom: *id, propriété\nAssociation : A (0,N) verbe (1,1) B'};
+  }
+  if(!order.length)return {error:'Écris au moins une entité, par exemple : Client: *id, nom'};
+  var W=170,pos={},cols=Math.min(order.length,3),gapX=150,gapY=120,x0=20,y0=30,rowH=[];
+  order.forEach(function(n,i){var r=Math.floor(i/cols);var h=34+Math.max(1,ents[n].props.length)*22;rowH[r]=Math.max(rowH[r]||0,h)});
+  var ycur=y0,rowY=[];rowH.forEach(function(h,r){rowY[r]=ycur;ycur+=h+gapY});
+  order.forEach(function(n,i){var r=Math.floor(i/cols),c=i%cols;pos[n]={x:x0+c*(W+gapX+40),y:rowY[r],h:34+Math.max(1,ents[n].props.length)*22}});
+  var svg='',maxX=0,maxY=0,css='font-family:JetBrains Mono,monospace;font-size:12px';
+  var lineC='var(--muted)',stroke='var(--fg)';
+  var used={};
+  assocs.forEach(function(as,k){
+    var pa=pos[as.a],pb=pos[as.b],ax=pa.x+W/2,ay=pa.y+pa.h/2,bx=pb.x+W/2,by=pb.y+pb.h/2,mx,my;
+    if(as.a===as.b){mx=pa.x+W+90;my=pa.y+pa.h/2;bx=pa.x+W;by=pa.y+pa.h-8;ax=pa.x+W;ay=pa.y+8}
+    else{mx=(ax+bx)/2;my=(ay+by)/2;var key=as.a+'|'+as.b;used[key]=(used[key]||0)+1;if(used[key]>1)my+=(used[key]-1)*70}
+    var aw=Math.max(80,as.name.length*8+28),ah=as.props.length?34+as.props.length*16:34;
+    function edge(px,py,pw,ph,tx,ty){var cx=px+pw/2,cy=py+ph/2,dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return {x:cx,y:cy};var sx=Math.abs(dx)>0?(pw/2)/Math.abs(dx):1e9,sy=Math.abs(dy)>0?(ph/2)/Math.abs(dy):1e9,s=Math.min(sx,sy);return {x:cx+dx*s,y:cy+dy*s}}
+    var e1=edge(pa.x,pa.y,W,pa.h,mx,my),e2=edge(pb.x,pb.y,W,pb.h,mx,my);
+    if(as.a===as.b){e1={x:pa.x+W,y:pa.y+pa.h*0.3};e2={x:pa.x+W,y:pa.y+pa.h*0.75}}
+    var t1=edge(mx-aw/2,my-ah/2,aw,ah,e1.x,e1.y),t2=edge(mx-aw/2,my-ah/2,aw,ah,e2.x,e2.y);
+    svg+='<line x1="'+e1.x+'" y1="'+e1.y+'" x2="'+t1.x+'" y2="'+t1.y+'" stroke="'+stroke+'" stroke-width="1.5"/><line x1="'+e2.x+'" y1="'+e2.y+'" x2="'+t2.x+'" y2="'+t2.y+'" stroke="'+stroke+'" stroke-width="1.5"/>';
+    function lab(e,t,c){var lx=e.x+(t.x-e.x)*0.28,ly=e.y+(t.y-e.y)*0.28-6;return '<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-weight="600" fill="var(--warm)" style="'+css+'">'+c+'</text>'}
+    svg+=lab(e1,t1,as.ca)+lab(e2,t2,as.cb);
+    svg+='<rect x="'+(mx-aw/2)+'" y="'+(my-ah/2)+'" width="'+aw+'" height="'+ah+'" rx="'+(ah/2>20?18:17)+'" fill="var(--accent-soft)" stroke="'+stroke+'" stroke-width="1.5"/>';
+    svg+='<text x="'+mx+'" y="'+(my-(as.props.length?ah/2-21:-4))+'" text-anchor="middle" font-weight="600" fill="var(--fg)" style="'+css+'">'+esc(as.name)+'</text>';
+    as.props.forEach(function(p,j){svg+='<text x="'+mx+'" y="'+(my-ah/2+38+j*16)+'" text-anchor="middle" fill="var(--muted)" style="'+css+'">'+esc(p)+'</text>'});
+    maxX=Math.max(maxX,mx+aw/2);maxY=Math.max(maxY,my+ah/2);
+  });
+  order.forEach(function(n){
+    var p=pos[n],e=ents[n];
+    svg+='<rect x="'+p.x+'" y="'+p.y+'" width="'+W+'" height="'+p.h+'" rx="6" fill="var(--surface)" stroke="'+stroke+'" stroke-width="1.8"/><rect x="'+p.x+'" y="'+p.y+'" width="'+W+'" height="30" rx="6" fill="var(--surface2)"/><line x1="'+p.x+'" y1="'+(p.y+30)+'" x2="'+(p.x+W)+'" y2="'+(p.y+30)+'" stroke="'+stroke+'" stroke-width="1.5"/>';
+    svg+='<text x="'+(p.x+W/2)+'" y="'+(p.y+20)+'" text-anchor="middle" font-weight="700" fill="var(--fg)" style="font-family:Bricolage Grotesque,sans-serif;font-size:14px">'+esc(n)+'</text>';
+    e.props.forEach(function(pr,j){var id=pr.charAt(0)==='*',t=id?pr.slice(1):pr;svg+='<text x="'+(p.x+12)+'" y="'+(p.y+50+j*22)+'" fill="var(--fg)" style="'+css+'"'+(id?' text-decoration="underline" font-weight="600"':'')+'>'+esc(t)+'</text>'});
+    maxX=Math.max(maxX,p.x+W);maxY=Math.max(maxY,p.y+p.h);
+  });
+  var w=maxX+30,h=maxY+30;
+  return {svg:'<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" role="img" aria-label="Schéma MCD" style="max-width:100%;padding:6px">'+svg+'</svg>'};
+}
+
+/* ============ Vues ============ */
+var app=$('#app');
+function setNav(){['home','lab'].forEach(function(n){var b=$('#n-'+n);if(S.view===n||(n==='home'&&S.view==='course'))b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
+
+function viewHome(){
+  var last=S.state.last,cont='';
+  if(last){var l=L.filter(function(x){return x.id===last})[0];if(l)cont='<div class="resume"><div class="t"><small>Reprendre là où tu t’es arrêté</small><strong>'+LANGS[l.lang].name+' · '+esc(l.title)+'</strong></div><button class="btn" data-open="'+l.id+'">Continuer</button></div>'}
+  var total=L.length,done=Object.keys(S.state.done).filter(function(k){return S.state.done[k]}).length;
+  var cats=Object.keys(LANGS).map(function(k){var g=LANGS[k],n=lessonsOf(k).length,d=doneCount(k);
+    return '<button class="cat" style="--c:'+g.color+'" data-lang="'+k+'"><span class="sym">'+esc(g.sym)+'</span><h3>'+g.name+'</h3><p>'+g.desc+'</p><div class="bar"><i style="width:'+(n?d/n*100:0)+'%"></i></div><div class="meta"><span>'+d+' / '+n+' leçons</span><span>'+(d===n&&n?'Terminé':'Ouvrir')+'</span></div></button>'}).join('');
+  app.innerHTML='<section class="hero"><h1>Apprends à coder, même sans connexion.</h1><p>Chaque notion est expliquée simplement, suivie d’un exemple, puis d’un exercice que tu exécutes toi-même. Ta progression est sauvegardée automatiquement.</p>'+cont+'</section>'+
+  '<div class="sec-title"><h2>Les cours</h2><span>'+done+' leçon'+(done>1?'s':'')+' terminée'+(done>1?'s':'')+' sur '+total+'</span></div><div class="grid">'+cats+'</div>'+
+  '<div class="lab-card"><div class="t"><h3>Bac à sable libre</h3><p>Écris ton propre code en HTML, CSS et JavaScript, Python ou SQL et vois le résultat tout de suite.</p></div><button class="btn" data-nav="lab">Ouvrir le bac à sable</button></div>'+
+  '<div class="sec-title"><h2>Prochainement</h2><span>d’autres cours nécessaires à un programmeur</span></div><div class="soon">'+SOON.map(function(s){return '<span>'+s+'</span>'}).join('')+'</div>';
+}
+
+function viewCourse(){
+  var g=LANGS[S.lang],list=lessonsOf(S.lang),l=list[S.idx],ex=l.ex,lvl='',toc='';
+  list.forEach(function(x,i){if(x.level!==lvl){lvl=x.level;toc+='<div class="lvl">'+lvl+'</div>'}toc+='<button data-idx="'+i+'" class="'+(S.state.done[x.id]?'done':'')+'" '+(i===S.idx?'aria-current="true"':'')+'><span class="ck">✓</span><span>'+esc(x.title)+'</span></button>'});
+  var draft=S.state.draft[l.id];if(draft==null)draft=ex.starter;
+  var isDone=!!S.state.done[l.id];
+  var runL=g.run;
+  var exampleCap={python:'exemple.py',html:'exemple.html',css:'style.css',js:'script.js',sql:'requete.sql',mcd:'schema.mcd'}[S.lang];
+  app.innerHTML='<div class="course" style="--c:'+g.color+'"><aside class="toc"><h3>'+g.name+'</h3>'+toc+'</aside>'+
+  '<article class="lesson"><div class="crumb">'+g.name.toUpperCase()+' · LEÇON '+(S.idx+1)+' / '+list.length+' · '+l.level.toUpperCase()+'</div><h1>'+esc(l.title)+'</h1>'+
+  '<section class="block"><h2>Cours</h2>'+l.course+'</section>'+
+  '<section class="block"><h2>Exemple</h2><div class="codebox"><div class="cap"><span>'+exampleCap+'</span><button class="btn ghost sm" id="try" style="color:#dbe6f2;border-color:#2e445c">Essayer cet exemple</button></div><pre class="code">'+esc(l.example)+'</pre></div></section>'+
+  '<section class="block"><h2>À toi de jouer</h2><p>'+ex.prompt+'</p><div class="codebox"><div class="cap"><span>ton code · Ctrl+Entrée pour exécuter</span></div><textarea class="ed" id="ed" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Éditeur de code">'+esc(draft)+'</textarea></div>'+
+  '<div class="actions"><button class="btn" id="run">Exécuter</button><button class="btn ghost" id="hint">Indice</button><button class="btn ghost" id="sol">Voir la solution</button><button class="btn ghost" id="reset">Recommencer</button></div><div id="rev"></div>'+
+  '<div class="out" id="out"><div class="cap">Résultat</div><div class="idle">Clique sur « Exécuter » pour voir ce que ton code produit.</div></div></section>'+
+  '<div class="foot"><button class="btn ghost" id="prev" '+(S.idx===0?'disabled':'')+'>Leçon précédente</button><span>'+(isDone?'<span class="done-badge">Leçon terminée</span> ':'')+'<button class="btn" id="finish">'+(S.idx<list.length-1?'Terminer et continuer':'Terminer le cours')+'</button></span></div></article></div>';
+  S.state.last=l.id;save();
+  var ed=$('#ed'),out=$('#out');
+  function run(code,lg){runCode(lg||runL,code,ex,out)}
+  ed.addEventListener('input',function(){S.state.draft[l.id]=ed.value;save()});
+  ed.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){e.preventDefault();var s=ed.selectionStart;ed.value=ed.value.slice(0,s)+'  '+ed.value.slice(ed.selectionEnd);ed.selectionStart=ed.selectionEnd=s+2;ed.dispatchEvent(new Event('input'))}
+    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();run(ed.value)}});
+  $('#run').onclick=function(){run(ed.value)};
+  $('#try').onclick=function(){run(l.example);out.scrollIntoView({behavior:'smooth',block:'center'})};
+  $('#hint').onclick=function(){$('#rev').innerHTML='<div class="reveal"><strong>Indice :</strong> '+esc(ex.hint)+'</div>'};
+  $('#sol').onclick=function(){$('#rev').innerHTML='<div class="reveal"><strong>Solution possible :</strong><pre>'+esc(ex.solution)+'</pre><div style="margin-top:8px"><button class="btn sm" id="use">Utiliser cette solution</button></div></div>';$('#use').onclick=function(){ed.value=ex.solution;ed.dispatchEvent(new Event('input'));run(ed.value)}};
+  $('#reset').onclick=function(){ed.value=ex.starter;ed.dispatchEvent(new Event('input'));$('#rev').innerHTML=''};
+  $('#prev').onclick=function(){openLesson(S.lang,S.idx-1)};
+  $('#finish').onclick=function(){S.state.done[l.id]=true;save();if(S.idx<list.length-1)openLesson(S.lang,S.idx+1);else goHome()};
+}
+
+var LABS={
+  web:{name:'Web (HTML + CSS + JS)',tabs:['index.html','style.css','script.js'],init:['<h1 id="titre">Bonjour !</h1>\n<button id="b">Clique-moi</button>\n<p id="msg"></p>','body {\n  font-family: sans-serif;\n  text-align: center;\n  padding: 24px;\n}\nh1 { color: teal; }\nbutton { padding: 10px 18px; font-size: 16px; }','var n = 0;\ndocument.getElementById("b").onclick = function () {\n  n++;\n  document.getElementById("msg").textContent = "Clics : " + n;\n};']},
+  js:{name:'JavaScript',tabs:['script.js'],init:['for (let i = 1; i <= 5; i++) {\n  console.log("Ligne " + i);\n}']},
+  python:{name:'Python',tabs:['main.py'],init:['noms = ["Awa", "Koffi", "Mariam"]\nfor nom in noms:\n    print("Salut", nom)']},
+  sql:{name:'SQL (base d’exemple : eleves)',tabs:['requete.sql'],init:['SELECT ville, COUNT(*) AS effectif\nFROM eleves\nGROUP BY ville;']},
+  mcd:{name:'MCD',tabs:['schema.mcd'],init:['Client: *id_client, nom, telephone\nCommande: *num_commande, date_commande\nClient (0,N) passer (1,1) Commande']}
+};
+var labKind='web',labTab=0,lastDoc='';
+function labGet(k){var s=S.state.lab[k];if(!s){s=S.state.lab[k]=LABS[k].init.slice()}return s}
+function labDoc(k){var c=labGet(k);return k==='web'?'<!doctype html><meta charset="utf-8"><style>'+c[1]+'</style>'+c[0]+'<scr'+'ipt>'+c[2]+'</scr'+'ipt>':c[0]}
+function viewLab(){
+  var k=labKind,def=LABS[k],code=labGet(k);
+  app.innerHTML='<section class="lab"><h1>Bac à sable</h1><p class="note" style="margin:0">Écris ce que tu veux, exécute, observe. Ton code est conservé automatiquement.</p>'+
+  '<div class="lab-bar"><label for="kind" class="note">Langage</label><select id="kind">'+Object.keys(LABS).map(function(x){return '<option value="'+x+'"'+(x===k?' selected':'')+'>'+LABS[x].name+'</option>'}).join('')+'</select><span class="sp"></span><button class="btn" id="lrun">Exécuter</button>'+(k==='web'?'<button class="btn ghost" id="lfs">Plein écran</button><button class="btn ghost" id="ldl">Copier le code</button>':'')+'</div>'+
+  '<div class="lab-grid"><div class="codebox"><div class="tabs" role="tablist">'+def.tabs.map(function(t,i){return '<button role="tab" data-tab="'+i+'" aria-selected="'+(i===labTab)+'">'+t+'</button>'}).join('')+'</div><textarea class="ed" id="led" style="min-height:360px" spellcheck="false" aria-label="Éditeur"></textarea></div><div class="out" id="lout" style="min-height:360px"><div class="cap">Résultat</div><div class="idle">Clique sur « Exécuter » pour déployer ton code.</div></div></div></section>';
+  if(labTab>=def.tabs.length)labTab=0;
+  var ed=$('#led'),out=$('#lout');ed.value=code[labTab];
+  function exec(){var lg=k;lastDoc=labDoc(k);runCode(lg,k==='web'?lastDoc:code[0],k==='sql'?{setup:SQLSETUP}:{},out);if(k==='web'){var f=$('iframe',out);if(f)f.style.height='360px'}}
+  ed.addEventListener('input',function(){code[labTab]=ed.value;save()});
+  ed.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){e.preventDefault();var s=ed.selectionStart;ed.value=ed.value.slice(0,s)+'  '+ed.value.slice(ed.selectionEnd);ed.selectionStart=ed.selectionEnd=s+2;ed.dispatchEvent(new Event('input'))}
+    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();exec()}});
+  $('#kind').onchange=function(e){labKind=e.target.value;labTab=0;viewLab()};
+  $('#lrun').onclick=exec;
+  document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){code[labTab]=ed.value;labTab=+b.dataset.tab;viewLab()}});
+  if(k==='web'){
+    $('#lfs').onclick=function(){var fs=$('#fs');fs.className='full';fs.hidden=false;fs.innerHTML='<div class="hd"><strong>Aperçu plein écran</strong><button class="btn sm" id="close">Fermer</button></div><iframe sandbox="allow-scripts" title="Aperçu"></iframe>';$('iframe',fs).srcdoc=labDoc('web');$('#close').onclick=function(){fs.hidden=true;fs.innerHTML=''}};
+    $('#ldl').onclick=function(){var t=labDoc('web');var b=this;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Copié'},function(){ed.value=t;ed.select();b.textContent='Sélectionné : copie avec Ctrl+C'});setTimeout(function(){b.textContent='Copier le code'},2200)};
+  }
+}
+
+function goHome(){
+  S.view='home';render();
+  try{if(history.state&&history.state.inner)history.back()}catch(e){}
+}
+function syncHistory(){
+  try{if(S.view!=='home'&&!(history.state&&history.state.inner))history.pushState({inner:1},'')}catch(e){}
+  $('#back').hidden=(S.view==='home');
+}
+addEventListener('popstate',function(){if(S.view!=='home'){S.view='home';render()}});
+$('#back').onclick=goHome;
+try{history.replaceState({home:1},'')}catch(e){}
+
+function render(){
+  var fs=$('#fs');fs.hidden=true;fs.innerHTML='';
+  setNav();syncHistory();
+  if(S.view==='home')viewHome();else if(S.view==='course')viewCourse();else viewLab();
+  window.scrollTo(0,0);
+}
+function openLesson(lang,idx){S.view='course';S.lang=lang;S.idx=idx;render()}
+
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-nav],[data-lang],[data-open],[data-idx]');if(!t)return;
+  if(t.dataset.nav){if(t.dataset.nav==='home')goHome();else{S.view=t.dataset.nav;render()}}
+  else if(t.dataset.lang){var ls=lessonsOf(t.dataset.lang),first=0;for(var i=0;i<ls.length;i++){if(!S.state.done[ls[i].id]){first=i;break}}openLesson(t.dataset.lang,first)}
+  else if(t.dataset.open){var l=L.filter(function(x){return x.id===t.dataset.open})[0];openLesson(l.lang,lessonsOf(l.lang).indexOf(l))}
+  else if(t.dataset.idx!==undefined&&S.view==='course'){openLesson(S.lang,+t.dataset.idx)}
+});
+
+/* Thème et réseau */
+function applyTheme(){var t=S.state.theme;if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme')}
+$('#theme').onclick=function(){var dark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);S.state.theme=dark?'light':'dark';save();applyTheme()};
+function net(){var on=navigator.onLine,p=$('#net');p.className='pill'+(on?'':' off');p.lastChild.textContent=on?'En ligne':'Hors connexion'}
+addEventListener('online',net);addEventListener('offline',net);
+
+load();applyTheme();net();render();
+
+/* Service worker : active le hors connexion */
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body>
+</html>
